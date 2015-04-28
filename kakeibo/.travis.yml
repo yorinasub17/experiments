@@ -1,0 +1,5 @@
+language: haskell
+ghc:
+  - 7.6
+before_script:
+  - cp Kakeibo/Server/Utils/Secret.hs.example Kakeibo/Server/Utils/Secret.hs

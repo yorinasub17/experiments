@@ -1,0 +1,8 @@
+.cabal-sandbox
+cabal.sandbox.config
+dist
+state
+
+Kakeibo/Server/Utils/Secret.hs
+
+*.swp

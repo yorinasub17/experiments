@@ -1,0 +1,10 @@
+{
+	"name": "recvf",
+	"description": "A simple vibe.d server application for receiving files from someone.",
+	"copyright": "Copyright © 2014, Yoriyasu Yano",
+	"authors": ["Yoriyasu Yano"],
+	"dependencies": {
+		"vibe-d": ">=0.7.20"
+	},
+	"versions": ["VibeDefaultMain"]
+}

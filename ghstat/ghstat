@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+import click
+import operator
+import tabulate
+import keyring
+import getpass
+from cytoolz import first, second, compose
+from enum import Enum
+from github import Github
+
+class PullRequestBlocker(Enum):
+    INITIAL_REVIEW = 1
+    ADDRESS_FEEDBACK = 2
+    FINAL_REVIEW = 3
+    CLEAN_BUILD = 4
+    MERGE_CONFLICTS = 5
+
+
+def determine_blockers(pull_request):
+    # Get info about comments
+    comments = sorted(pull_request.get_issue_comments(), key=operator.attrgetter('created_at'), reverse=True)
+    if comments:
+        last_comment = comments[0]
+    else:
+        last_comment = None
+    commenters = {comm.user.login for comm in comments if comm.user.login != pull_request.user.login}
+
+    # Now determine blockers based on workflow heuristics
+    blockers = []
+    if len(commenters) == 0:
+        blockers.append((PullRequestBlocker.INITIAL_REVIEW, pull_request.assignee.login))
+    elif last_comment and last_comment.user == pull_request.assignee:
+        blockers.append((PullRequestBlocker.ADDRESS_FEEDBACK, pull_request.user.login))
+    elif last_comment and last_comment.user == pull_request.user:
+        blockers.append((PullRequestBlocker.FINAL_REVIEW, pull_request.assignee.login))
+
+    if not pull_request.mergeable:
+        blockers.append((PullRequestBlocker.MERGE_CONFLICTS, pull_request.user.login))
+
+    # TODO: add condition for CI builds
+
+    return blockers
+
+def get_api_key():
+    api_key = keyring.get_password('ghstat', getpass.getuser())
+    if not api_key:
+        api_key = getpass.getpass('Enter Github API Key: ').strip()
+        keyring.set_password('ghstat', getpass.getuser(), api_key)
+    return api_key
+
+@click.command()
+@click.argument('repository')
+def ghstat(repository):
+    client = Github(get_api_key())
+    open_pulls = client.get_repo(repository).get_pulls(state='open')
+
+    headers = ['Pull Request', 'Issuer', 'Assignee', 'Waiting on', 'Blockers']
+    data = []
+    for pull in open_pulls:
+        blockers = determine_blockers(pull)
+        users_needing_to_act = ', '.join(set(map(second, blockers)))
+        blocker_codes = ', '.join(map(compose(str, first), blockers))
+        data.append((pull.title, pull.user.login, pull.assignee.login, users_needing_to_act, blocker_codes))
+    print tabulate.tabulate(data, headers=headers)
+
+if __name__ == '__main__':
+    ghstat()

@@ -1,0 +1,15 @@
+Django
+django-extensions
+djangorestframework
+
+cytoolz
+delorean
+http://media.liquidx.net/static/pytagger/pytagger-0.5.tar.bz2
+
+# Test
+mock
+flake8
+
+# Dev tools
+ipython
+ipdb

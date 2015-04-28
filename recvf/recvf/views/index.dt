@@ -1,0 +1,9 @@
+!!! 5
+html
+  head
+  body
+    h1 Upload File
+    form(method="POST", enctype="multipart/form-data")
+      p File:
+        input(type="file", name="file", size="50", maxlength="100000")
+      input(type="submit", value="Upload")

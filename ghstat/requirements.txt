@@ -1,0 +1,7 @@
+PyGithub
+enum34
+tabulate
+cytoolz
+click
+setuptools
+keyring
