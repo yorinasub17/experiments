@@ -1,0 +1,17 @@
+<h2>Show image</h2>
+
+<ul>
+
+  <li>
+    <strong>Title:</strong>
+    <%= @image.title %>
+  </li>
+
+  <li>
+    <strong>Uuid:</strong>
+    <%= @image.uuid %>
+  </li>
+
+</ul>
+
+<%= link "Back", to: image_path(@conn, :index) %>
