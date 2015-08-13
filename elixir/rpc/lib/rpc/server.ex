@@ -63,7 +63,6 @@ defmodule RPC.Server do
   end
 
   def handle_info({:tcp, socket, rawdata}, state = %State{request_count: request_count}) do
-    IO.inspect(rawdata)
     do_rpc(socket, rawdata)
     {:noreply, %State{ state | request_count: request_count+1 }}
   end
@@ -76,9 +75,13 @@ defmodule RPC.Server do
   rawdata is a string of the form: "module:function(arglist)"
   """
   defp do_rpc(socket, rawdata) do
-    {module, function, args} = extract_mfa(rawdata)
-    result = apply(module, function, args)
-    :gen_tcp.send(socket, "#{inspect(result)}\n")
+    try do
+      {module, function, args} = extract_mfa(rawdata)
+      result = apply(module, function, args)
+      :gen_tcp.send(socket, "#{inspect(result)}\n")
+    rescue
+      e -> :gen_tcp.send(socket, "#{inspect(e)}\n")
+    end
   end
 
   defp extract_mfa(rawdata) do
