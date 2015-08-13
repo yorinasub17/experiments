@@ -78,6 +78,7 @@ defmodule RPC.Server do
   defp do_rpc(socket, rawdata) do
     {module, function, args} = extract_mfa(rawdata)
     result = apply(module, function, args)
+    :gen_tcp.send(socket, "#{inspect(result)}\n")
   end
 
   defp extract_mfa(rawdata) do
