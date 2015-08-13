@@ -1,4 +1,4 @@
-defmodule RPC.Server do
+defmodule Rpc.Server do
   @moduledoc """
   RPC over TCP server. This module defines a server process that listens for
   incoming TCP connections and allows the user to execute RPC commands via that
@@ -87,7 +87,12 @@ defmodule RPC.Server do
   defp extract_mfa(rawdata) do
     [_match, module, function, arguments] = Regex.run(~r/([^:]+):([^()]+)\(([^)]*)\)/, to_string(rawdata))
     {module, _bindings} = Code.eval_string(module)
-    {module, String.to_atom(function), parse_args(arguments)}
+    arguments = case arguments do
+      "" -> []
+      _ -> parse_args(arguments)
+    end
+    function = String.to_atom(function)
+    {module, function, arguments}
   end
 
   defp parse_args(arguments) do

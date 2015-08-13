@@ -14,7 +14,8 @@ defmodule Rpc.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger],
+     mod: {Rpc, 8765}]
   end
 
   # Dependencies can be Hex packages:
@@ -27,6 +28,6 @@ defmodule Rpc.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    []
+    [{:ex_doc, "~> 0.8", [only: :dev]}]
   end
 end
