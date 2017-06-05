@@ -5,3 +5,6 @@ Require:
 
 Compile with:
 `ocamlbuild E.byte`
+
+Execute with:
+`./E.byte`
