@@ -1,0 +1,2 @@
+let x be "foo" in x + 10
+# Can't plus a str
