@@ -1,7 +1,11 @@
+_build
 *.cmi
 *.cmx
 *.o
 *.log
 *.cache
+*.byte
 
 testE
+
+*.swp

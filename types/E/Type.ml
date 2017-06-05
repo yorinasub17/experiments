@@ -5,7 +5,7 @@ type etype =
 
 type typedExpressionBase =
     | TypedVar of string
-    | TypedNumLit of int
+    | TypedNumLit of float
     | TypedStrLit of string
     | TypedPlus of (etype * typedExpressionBase) * (etype * typedExpressionBase)
     | TypedTimes of (etype * typedExpressionBase) * (etype * typedExpressionBase)
@@ -18,20 +18,20 @@ type typedExpression = etype * typedExpressionBase
 
 (* TODO: all of the below is hard coded type rules... How do I generalize? *)
 let rec assignType e = match e with
-      Untyped.NumLit k -> (NUM, TypedNumLit k)
-    | Untyped.StrLit k -> (STR, TypedStrLit k)
-    | Untyped.Plus (e1, e2) ->
+      Ast.NumLit k -> (NUM, TypedNumLit k)
+    | Ast.StrLit k -> (STR, TypedStrLit k)
+    | Ast.Plus (e1, e2) ->
             (NUM, TypedPlus ((assignType e1), (assignType e2)))
-    | Untyped.Times (e1, e2) ->
+    | Ast.Times (e1, e2) ->
             (NUM, TypedTimes ((assignType e1), (assignType e2)))
-    | Untyped.Cat (e1, e2) ->
+    | Ast.Cat (e1, e2) ->
             (STR, TypedCat ((assignType e1), (assignType e2)))
-    | Untyped.Len k ->
+    | Ast.Len k ->
             (NUM, TypedLen (assignType k))
     (* Var is not valid, because there should be no variables left after let substitution *)
     (* Let is not valid, because they should all be reduced *)
-    | Untyped.Var varname -> (NONE, TypedVar varname)
-    | Untyped.Let (e1, varname, e2) -> (NONE, TypedLet (assignType e1, varname, assignType e2))
+    | Ast.Var varname -> (NONE, TypedVar varname)
+    | Ast.Let (e1, varname, e2) -> (NONE, TypedLet (assignType e1, varname, assignType e2))
 
 let rec checkType typedE = match typedE with
       (NUM, TypedNumLit _) -> true
@@ -46,3 +46,29 @@ let rec checkType typedE = match typedE with
             checkType (STR, e)
     (* if we match anything else, then it is a type error *)
     | _ -> false
+
+
+let rec string_of_type typ =
+    match typ with
+    | NUM -> "NUM"
+    | STR -> "STR"
+    | NONE -> "NONE"
+
+let rec string_of_typed_expr (t, typed_expr) =
+    match typed_expr with
+    | TypedVar id -> 
+            id ^ " : " ^ string_of_type t
+    | TypedNumLit flt ->
+            "num[" ^ string_of_float flt ^ "] : " ^ string_of_type t
+    | TypedStrLit str ->
+            "str[" ^ str ^ "] : " ^ string_of_type t
+    | TypedPlus ((t1, typedE1), (t2, typedE2)) ->
+            "plus(" ^ string_of_typed_expr (t1, typedE1) ^ "; " ^ string_of_typed_expr (t2, typedE2) ^ ") : " ^ string_of_type t
+    | TypedTimes ((t1, typedE1), (t2, typedE2)) ->
+            "times(" ^ string_of_typed_expr (t1, typedE1) ^ "; " ^ string_of_typed_expr (t2, typedE2) ^ ") : " ^ string_of_type t
+    | TypedCat ((t1, typedE1), (t2, typedE2)) ->
+            "cat(" ^ string_of_typed_expr (t1, typedE1) ^ "; " ^ string_of_typed_expr (t2, typedE2) ^ ") : " ^ string_of_type t
+    | TypedLen (t1, typedE1) ->
+            "len(" ^ string_of_typed_expr (t1, typedE1) ^ ") : " ^ string_of_type t
+    | TypedLet ((t1, typedE1), varname, (t2, typedE2)) ->
+            "let(" ^ string_of_typed_expr (t1, typedE1) ^ "; " ^ varname ^ ".(" ^ string_of_typed_expr (t2, typedE2) ^ ")) : " ^ string_of_type t

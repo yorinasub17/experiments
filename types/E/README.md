@@ -1,5 +1,7 @@
+# Playing with Type Theory using Toy language E as defined in PFPL
+
 Require:
 `opam install ounit`
 
 Compile with:
-`ocamlfind opt -o testE -package oUnit -linkpkg -g Untyped.ml Typed.ml test.ml`
+`ocamlbuild E.byte`

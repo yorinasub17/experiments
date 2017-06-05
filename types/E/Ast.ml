@@ -2,7 +2,7 @@ type expression =
     (* The string is the name of the variable *)
     | Var of string
     (* The int is the value of the literal *)
-    | NumLit of int
+    | NumLit of float
     (* The string is the value of the literal *)
     | StrLit of string
     (* The second expression is added to the first expression
@@ -41,3 +41,17 @@ let rec reduceLetExpressions e substitutions = match e with
           let reducedE1 = reduceLetExpressions e1 substitutions in
           Len reducedE1
     | k -> k
+
+let reduce expr =
+    reduceLetExpressions expr (Hashtbl.create 100)
+
+let rec string_of_expr expr =
+    match expr with
+    | Var id -> id
+    | NumLit flt -> "num[" ^ string_of_float flt ^ "]"
+    | StrLit str -> "str[" ^ str ^ "]"
+    | Plus (e1, e2) -> "plus(" ^ string_of_expr e1 ^ "; " ^ string_of_expr e2 ^ ")"
+    | Times (e1, e2) -> "times(" ^ string_of_expr e1 ^ "; " ^ string_of_expr e2 ^ ")"
+    | Cat (e1, e2) -> "cat(" ^ string_of_expr e1 ^ "; " ^ string_of_expr e2 ^ ")"
+    | Len e -> "len(" ^ string_of_expr e ^ ")"
+    | Let (e1, id, e2) -> "let(" ^ string_of_expr e1 ^ "; " ^ id ^ ".(" ^ string_of_expr e2 ^ "))"
